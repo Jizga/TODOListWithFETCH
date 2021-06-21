@@ -4,29 +4,26 @@ import { Task } from "./Task";
 export function List() {
 	//Variables relacionadas con el fetch
 	const url = "https://assets.breatheco.de/apis/fake/todos/user/Vivi";
-	const options = {
-		method: "GET",
-		// body: JSON.stringify(data), // GET no lleva body
-		headers: {
-			"Content-Type": "application/json"
-		}
-	};
 
 	const [error, setError] = useState(null);
 	const [isLoaded, setIsLoaded] = useState(false);
-	// ----------------------------------------------------------
 
 	const [list, setList] = useState([]);
 	const [inputTask, setInputTask] = useState("");
 
 	useEffect(() => {
-		fetch(url, options)
+		fetch(url, {
+			method: "GET",
+			headers: {
+				"Content-Type": "application/json"
+			}
+		})
 			//Obtener los datos en formato JSON
-			.then(res => res.json())
+			.then(response => response.json())
 			.then(
-				result => {
+				data => {
 					setIsLoaded(true);
-					setList(result);
+					setList(data);
 				},
 				// Nota: es importante manejar errores aquí y no en
 				// un bloque catch() para que no interceptemos errores
@@ -39,34 +36,78 @@ export function List() {
 			.catch(error => console.error("Error:", error));
 	}, []);
 
-	console.log("LISTA : ", list, typeof list);
+	const getInputValue = e => {
+		setInputTask(e.target.value);
+	};
+
+	const addTask = newTask => {
+		fetch(url, {
+			method: "PUT",
+			body: JSON.stringify(list),
+			headers: {
+				"Content-Type": "application/json"
+			}
+		})
+			.then(response => response.json())
+			.then(
+				data => {
+					console.log("POST antes del if : ", data, typeof data);
+
+					if (inputTask.trim() !== "") {
+						setIsLoaded(true);
+
+						//Aquí nuestros datos de los estados
+						setList([
+							...list,
+							{
+								id: Date.now(),
+								label: newTask,
+								done: false
+							}
+						]);
+
+						console.log("POST data : ", data, typeof data);
+					}
+				},
+
+				error => {
+					setIsLoaded(true);
+					setError(error);
+				}
+			)
+			.catch(error => console.error("Error:", error));
+	};
+
+	const pressEnter = e => {
+		if (inputTask.trim() !== "") {
+			if (e.key === "Enter") {
+				addTask(inputTask);
+				setInputTask("");
+			}
+		}
+	};
 
 	return (
 		<div className="container text-center mt-5 mb-5 pt-3 pb-5 d-flex justify-content-center rounded myListContainer">
 			<div className="p-0 m-0 myContainer">
 				<div className="row d-flex justify-content-center">
-					<h1 className="col-9 col-sm-10 col-md-10 col-lg-12 col-xl-12 mb-3 mt-2">
-						TODO App
-					</h1>
+					<h1 className="col-12 mb-3 mt-2">TODO App</h1>
 				</div>
 
 				<div className="row mb-4 d-flex justify-content-center">
 					<input
-						className="col-9 col-sm-10 col-md-10 col-lg-12 col-xl-12 border-0 rounded-pill text-center"
+						className="col-9 border-0 rounded-pill text-center"
 						type="text"
-						onChange={e => setInputTask(e.target.value)}
+						onChange={e => getInputValue(e)}
 						value={inputTask}
-						// onKeyPress={e => pressEnter(e)}
+						onKeyPress={e => pressEnter(e)}
 						placeholder="No tasks, add a task"
 						autoFocus
 					/>
 				</div>
 
 				<div className="row d-flex justify-content-center align-items-start">
-					<div className="d-flex flex-column col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
-						<h4 className="col-8 col-sm-9 col-md-9 col-lg-12 col-xl-12 taskTitle">
-							To do tasks
-						</h4>
+					<div className="d-flex flex-column col-12">
 						{list.map(task => {
 							return (
 								<Task
@@ -74,7 +115,8 @@ export function List() {
 									id={task.id}
 									taskText={task.label}
 									done={task.done}
-									// addTaskDone={} deleteTask={} taskDoneList={} notDone={}
+									// addTaskDone={}
+									// deleteTask={} taskDoneList={} notDone={}
 								/>
 							);
 						})}
@@ -85,32 +127,6 @@ export function List() {
 							</div>
 						</div>
 					</div>
-
-					{/* <div className="d-flex flex-column col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
-                        <h4 className="col-8 col-sm-9 col-md-9 col-lg-12 col-xl-12 taskTitle">
-                            Done tasks
-						</h4>
-                        {taskDoneList.map(task => {
-                            return (
-                                <Task
-                                    key={task.id}
-                                    id={task.id}
-                                    taskText={task.text}
-                                    done={task.done}
-                                    deleteTask={deleteTask}
-                                    addTaskDone={addTaskDone}
-                                    taskDoneList={taskDoneList}
-                                    dontDone={dontDone}
-                                />
-                            );
-                        })}
-
-                        <div className="d-flex justify-content-start">
-                            <div className="taskNum">
-                                {taskDoneList.length} tasks done
-							</div>
-                        </div>
-                    </div> */}
 				</div>
 			</div>
 		</div>
