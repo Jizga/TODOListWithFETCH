@@ -12,30 +12,30 @@ export function List() {
 	const [inputTask, setInputTask] = useState("");
 
 	useEffect(() => {
+		getList();
+	}, []);
+
+	const getList = () => {
 		fetch(url, {
 			method: "GET",
 			headers: {
 				"Content-Type": "application/json"
 			}
 		})
-			//Obtener los datos en formato JSON
 			.then(response => response.json())
 			.then(
 				data => {
 					setIsLoaded(true);
 					setList(data);
-					console.log("GET -->", data);
 				},
-				// Nota: es importante manejar errores aquí y no en
-				// un bloque catch() para que no interceptemos errores
-				// de errores reales en los componentes.
+
 				error => {
 					setIsLoaded(true);
 					setError(error);
 				}
 			)
 			.catch(error => console.error("Error:", error));
-	}, []);
+	};
 
 	const getInputValue = e => {
 		setInputTask(e.target.value);
@@ -83,8 +83,13 @@ export function List() {
 	};
 
 	const deleteTask = idTask => {
+		//La actualización de la lista debe de ser antes
+		setList(list.filter(task => task.id !== idTask));
+
 		fetch(url, {
-			method: "DELETE",
+			method: "PUT", //El método DELETE de esta api lo borra todo, usuario incluido
+			//El PUT está funcionando regular, actualiza la lista en la BD cuando se ha borrado o añadido dos tareas, borrando o añadiendo la primera de ellas
+			body: JSON.stringify(list),
 			headers: {
 				"Content-Type": "application/json"
 			}
@@ -92,10 +97,7 @@ export function List() {
 			.then(response => response.json())
 			.then(
 				data => {
-					console.log("data : ", data, typeof data);
-
 					setIsLoaded(true);
-					setList(list.filter(task => task.id !== idTask));
 				},
 				error => {
 					setIsLoaded(true);
@@ -104,8 +106,6 @@ export function List() {
 			)
 			.catch(error => console.error("Error:", error));
 	};
-
-	console.log("LISTA DE TAREAS : ", list);
 
 	return (
 		<div className="container text-center mt-5 mb-5 pt-3 pb-5 d-flex justify-content-center rounded myListContainer">
