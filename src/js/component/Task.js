@@ -13,10 +13,7 @@ export function Task(props) {
 				<div className="d-flex pt-2">
 					<i
 						className="far fa-trash-alt mr-4"
-						// onClick={() =>
-						// 	props.deleteTask(props.id, null)
-						// }
-					></i>
+						onClick={() => props.deleteTask(props.id)}></i>
 
 					{/* <i
 						className="fas fa-check fa-lg"
@@ -33,10 +30,7 @@ export function Task(props) {
 
 Task.propTypes = {
 	taskText: PropTypes.string,
-	deleteTask: PropTypes.func,
 	id: PropTypes.number,
 	done: PropTypes.bool,
-	addTaskDone: PropTypes.func,
-	taskDoneList: PropTypes.array,
-	notDone: PropTypes.func
+	deleteTask: PropTypes.func
 };

@@ -3,7 +3,7 @@ import { Task } from "./Task";
 
 export function List() {
 	//Variables relacionadas con el fetch
-	const url = "https://assets.breatheco.de/apis/fake/todos/user/Vivi";
+	const url = "https://assets.breatheco.de/apis/fake/todos/user/jizga";
 
 	const [error, setError] = useState(null);
 	const [isLoaded, setIsLoaded] = useState(false);
@@ -24,6 +24,7 @@ export function List() {
 				data => {
 					setIsLoaded(true);
 					setList(data);
+					console.log("GET -->", data);
 				},
 				// Nota: es importante manejar errores aquí y no en
 				// un bloque catch() para que no interceptemos errores
@@ -51,12 +52,8 @@ export function List() {
 			.then(response => response.json())
 			.then(
 				data => {
-					console.log("POST antes del if : ", data, typeof data);
-
 					if (inputTask.trim() !== "") {
 						setIsLoaded(true);
-
-						//Aquí nuestros datos de los estados
 						setList([
 							...list,
 							{
@@ -65,8 +62,6 @@ export function List() {
 								done: false
 							}
 						]);
-
-						console.log("POST data : ", data, typeof data);
 					}
 				},
 
@@ -86,6 +81,31 @@ export function List() {
 			}
 		}
 	};
+
+	const deleteTask = idTask => {
+		fetch(url, {
+			method: "DELETE",
+			headers: {
+				"Content-Type": "application/json"
+			}
+		})
+			.then(response => response.json())
+			.then(
+				data => {
+					console.log("data : ", data, typeof data);
+
+					setIsLoaded(true);
+					setList(list.filter(task => task.id !== idTask));
+				},
+				error => {
+					setIsLoaded(true);
+					setError(error);
+				}
+			)
+			.catch(error => console.error("Error:", error));
+	};
+
+	console.log("LISTA DE TAREAS : ", list);
 
 	return (
 		<div className="container text-center mt-5 mb-5 pt-3 pb-5 d-flex justify-content-center rounded myListContainer">
@@ -115,8 +135,7 @@ export function List() {
 									id={task.id}
 									taskText={task.label}
 									done={task.done}
-									// addTaskDone={}
-									// deleteTask={} taskDoneList={} notDone={}
+									deleteTask={deleteTask}
 								/>
 							);
 						})}
