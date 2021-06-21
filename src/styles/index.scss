@@ -1,13 +1,72 @@
 @import "~bootstrap/scss/bootstrap.scss";
 
-/* 
+body{
+    background: black;
+}
 
-    You can write your own styles here...
-    
-    
-    ...Or you can use the import command to include 
-    other sylesheets into your bunde as well, e.j:
-    
-    import 'relative/path/to/stylesheet.scss';
+.myListContainer{
+    margin-top: 5rem!important;
+    width: 42rem!important;
+    background-color: rgba(14, 14, 13, 0.719);
+}
 
-*/
+.myContainer{
+    width: 30rem!important;
+}
+
+
+h1{
+    font-family: 'Monoton', cursive;
+     color: rgba(252, 1, 1, 0.986);
+}
+
+input{
+    background-color: rgba(165, 160, 160, 0.144);
+    caret-color: rgb(229, 255, 0);
+    color: rgba(221, 219, 219, 0.945);
+}
+
+input:focus {
+    outline: none !important;
+    border:1px solid red;
+    box-shadow: 0 0 10px rgb(233, 235, 136);
+}
+
+::placeholder, .taskNum, .taskTitle{
+    color: rgba(221, 218, 218, 0.562);
+}
+
+hr{
+    background-color: rgba(233, 236, 245, 0.603);
+}
+
+.myTask{
+    color: rgba(242, 243, 247, 0.986);
+}
+
+.fa-trash-alt{
+    color: rgba(247, 9, 9, 0.61);
+    cursor: pointer;
+}
+
+.fa-trash-alt:hover{
+    color: rgb(245, 29, 1);
+}
+
+.fa-check{
+    color: rgba(53, 133, 7, 0.747);
+    cursor: pointer;
+}
+
+.fa-check:hover{
+    color: rgb(4, 248, 16);
+}
+
+.fa-times{
+     color: rgba(184, 107, 7, 0.747);
+    cursor: pointer;
+}
+
+.fa-times:hover{
+     color: rgb(255, 145, 0);
+}
