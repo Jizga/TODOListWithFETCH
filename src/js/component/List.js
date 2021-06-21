@@ -8,8 +8,9 @@ export function List() {
 	const [error, setError] = useState(null);
 	const [isLoaded, setIsLoaded] = useState(false);
 
-	const [list, setList] = useState([]);
 	const [inputTask, setInputTask] = useState("");
+	const [list, setList] = useState([]);
+	const [listDone, setListDone] = useState([]);
 
 	useEffect(() => {
 		getList();
@@ -25,20 +26,35 @@ export function List() {
 			.then(response => response.json())
 			.then(
 				data => {
-					setIsLoaded(true);
-					setList(data);
+					data.map(task =>
+						task.done === false
+							? addTaskToList(task)
+							: addTaskToDoneList(task)
+					);
 				},
 
 				error => {
-					setIsLoaded(true);
 					setError(error);
 				}
 			)
-			.catch(error => console.error("Error:", error));
+			.catch(error => console.error("Error:", error))
+			.finally(setIsLoaded(true));
 	};
 
 	const getInputValue = e => {
 		setInputTask(e.target.value);
+	};
+
+	const addTaskToList = newTask => {
+		// Parece ser que asi es como se añaden cosas en React cuando quieres meterle algo a un array
+		// prevList es lo que hay antes de meter la Task
+		// Los setStates parece ser que no son inmediatos, simplemente lo pone en cola y ya lo hara cuando
+		// le pete, por eso antes solo metía el ultimo
+		setList(prevList => [...prevList, newTask]);
+	};
+
+	const addTaskToDoneList = newDoneTask => {
+		setListDone(prevDoneList => [...prevDoneList, newDoneTask]);
 	};
 
 	const addTask = newTask => {
@@ -107,6 +123,49 @@ export function List() {
 			.catch(error => console.error("Error:", error));
 	};
 
+	const addTaskDone = idDone => {
+		fetch(url, {
+			method: "PUT",
+			body: JSON.stringify(listDone),
+			headers: {
+				"Content-Type": "application/json"
+			}
+		})
+			.then(response => response.json())
+			.then(
+				data => {
+					setIsLoaded(true);
+
+					if (listDone !== []) {
+						//lista de tareas hechas actualizada con la tarea hecha
+						let taskDone = list.filter(task => {
+							if (task.id === idDone) {
+								task.done = true;
+
+								setListDone([...listDone, taskDone]);
+
+								let listWithoutTaskDone = list.filter(
+									task => task.id !== idDone
+								);
+
+								console.log("taskDone : ", taskDone);
+
+								//Lista de tareas pendientes actualizada
+								setList(listWithoutTaskDone);
+
+								console.log("lista pendientes : ", list);
+							}
+						});
+					}
+				},
+				error => {
+					setIsLoaded(true);
+					setError(error);
+				}
+			)
+			.catch(error => console.error("Error:", error));
+	};
+
 	return (
 		<div className="container text-center mt-5 mb-5 pt-3 pb-5 d-flex justify-content-center rounded myListContainer">
 			<div className="p-0 m-0 myContainer">
@@ -127,7 +186,8 @@ export function List() {
 				</div>
 
 				<div className="row d-flex justify-content-center align-items-start">
-					<div className="d-flex flex-column col-12">
+					<div className="d-flex flex-column col-6">
+						<h4 className="col-12 taskTitle">Tasks to do</h4>
 						{list.map(task => {
 							return (
 								<Task
@@ -136,6 +196,7 @@ export function List() {
 									taskText={task.label}
 									done={task.done}
 									deleteTask={deleteTask}
+									addTaskDone={addTaskDone}
 								/>
 							);
 						})}
@@ -143,6 +204,30 @@ export function List() {
 						<div className="d-flex justify-content-start">
 							<div className="taskNum">
 								{list.length} tasks left
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div className="row d-flex justify-content-center align-items-start">
+					<div className="d-flex flex-column col-6">
+						<h4 className="col-12 taskTitle">Done tasks</h4>
+						{listDone.map(task => {
+							return (
+								<Task
+									key={task.id}
+									id={task.id}
+									taskText={task.label}
+									done={task.done}
+									deleteTask={deleteTask}
+									addTaskDone={addTaskDone}
+								/>
+							);
+						})}
+
+						<div className="d-flex justify-content-start">
+							<div className="taskNum">
+								{listDone.length} tasks done
 							</div>
 						</div>
 					</div>
