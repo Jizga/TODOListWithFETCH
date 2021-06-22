@@ -5,9 +5,6 @@ export function List() {
 	//Variables relacionadas con el fetch
 	const url = "https://assets.breatheco.de/apis/fake/todos/user/jizga";
 
-	const [error, setError] = useState(null);
-	const [isLoaded, setIsLoaded] = useState(false);
-
 	const [inputTask, setInputTask] = useState("");
 	const [list, setList] = useState([]);
 	const [listDone, setListDone] = useState([]);
@@ -24,21 +21,18 @@ export function List() {
 			}
 		})
 			.then(response => response.json())
-			.then(
-				data => {
+			.then(data => {
+				if (data) {
 					data.map(task =>
 						task.done === false
 							? addTaskToList(task)
 							: addTaskToDoneList(task)
 					);
-				},
-
-				error => {
-					setError(error);
+				} else {
+					console.error("Error in data");
 				}
-			)
-			.catch(error => console.error("Error:", error))
-			.finally(setIsLoaded(true));
+			})
+			.catch(error => console.error("Error:", error));
 	};
 
 	const getInputValue = e => {
@@ -48,8 +42,8 @@ export function List() {
 	const addTaskToList = newTask => {
 		// Parece ser que asi es como se añaden cosas en React cuando quieres meterle algo a un array
 		// prevList es lo que hay antes de meter la Task
-		// Los setStates parece ser que no son inmediatos, simplemente lo pone en cola y ya lo hara cuando
-		// le pete, por eso antes solo metía el ultimo
+		// Los set del useState parece ser que no son inmediatos, simplemente lo pone en cola y ya lo hara cuando
+		// él quiera, por eso antes solo metía el último
 		setList(prevList => [...prevList, newTask]);
 	};
 
@@ -66,10 +60,9 @@ export function List() {
 			}
 		})
 			.then(response => response.json())
-			.then(
-				data => {
+			.then(data => {
+				if (data) {
 					if (inputTask.trim() !== "") {
-						setIsLoaded(true);
 						setList([
 							...list,
 							{
@@ -79,13 +72,10 @@ export function List() {
 							}
 						]);
 					}
-				},
-
-				error => {
-					setIsLoaded(true);
-					setError(error);
+				} else {
+					console.error("Error in data");
 				}
-			)
+			})
 			.catch(error => console.error("Error:", error));
 	};
 
@@ -99,7 +89,7 @@ export function List() {
 	};
 
 	const deleteTask = idTask => {
-		//La actualización de la lista debe de ser antes
+		//La actualización de la lista debe de ser antes del fetch
 		setList(list.filter(task => task.id !== idTask));
 
 		fetch(url, {
@@ -111,14 +101,10 @@ export function List() {
 			}
 		})
 			.then(response => response.json())
-			.then(
-				data => {
-					setIsLoaded(true);
-				},
-				error => {
-					setIsLoaded(true);
-					setError(error);
-				}
+			.then(data =>
+				data
+					? console.log("Data is ok: ", data)
+					: console.error("Error in data")
 			)
 			.catch(error => console.error("Error:", error));
 	};
@@ -132,10 +118,8 @@ export function List() {
 			}
 		})
 			.then(response => response.json())
-			.then(
-				data => {
-					setIsLoaded(true);
-
+			.then(data => {
+				if (data) {
 					if (listDone !== []) {
 						//lista de tareas hechas actualizada con la tarea hecha
 						let taskDone = list.filter(task => {
@@ -157,12 +141,10 @@ export function List() {
 							}
 						});
 					}
-				},
-				error => {
-					setIsLoaded(true);
-					setError(error);
+				} else {
+					console.error("Error in data");
 				}
-			)
+			})
 			.catch(error => console.error("Error:", error));
 	};
 
@@ -207,9 +189,7 @@ export function List() {
 							</div>
 						</div>
 					</div>
-				</div>
 
-				<div className="row d-flex justify-content-center align-items-start">
 					<div className="d-flex flex-column col-6">
 						<h4 className="col-12 taskTitle">Done tasks</h4>
 						{listDone.map(task => {
