@@ -1,4 +1,5 @@
 @import "~bootstrap/scss/bootstrap.scss";
+@import url('https://fonts.googleapis.com/css2?family=Fredericka+the+Great&display=swap');
 
 body{
     background: black;
@@ -16,13 +17,13 @@ body{
 
 
 h1{
-    font-family: 'Monoton', cursive;
-     color: rgba(252, 1, 1, 0.986);
+    font-family: 'Fredericka the Great', cursive;
+     color: rgba(227, 252, 1, 0.986);
 }
 
 input{
     background-color: rgba(165, 160, 160, 0.144);
-    caret-color: rgb(229, 255, 0);
+    caret-color:rgba(227, 252, 1, 0.986);
     color: rgba(221, 219, 219, 0.945);
 }
 
@@ -63,10 +64,10 @@ hr{
 }
 
 .fa-times{
-     color: rgba(184, 107, 7, 0.747);
+     color: rgba(146, 161, 12, 0.733);
     cursor: pointer;
 }
 
 .fa-times:hover{
-     color: rgb(255, 145, 0);
+     color: rgba(227, 252, 1, 0.986);
 }

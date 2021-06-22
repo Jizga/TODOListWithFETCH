@@ -141,44 +141,55 @@ export function List() {
 						onChange={e => getInputValue(e)}
 						value={inputTask}
 						onKeyPress={e => pressEnter(e)}
-						placeholder="No tasks, add a task"
+						placeholder="Add a new task"
 						autoFocus
 					/>
 				</div>
 
 				<div className="row d-flex justify-content-center align-items-start">
 					<div className="d-flex flex-column col-5 mr-1">
-						<h4 className="col-12 taskTitle">Tasks to do</h4>
+						<h4 className="col-12 taskTitle">Pending Tasks</h4>
 						{list
 							//Tareas pendientes
-							.filter(task => task.done === false)
-							.map(task => {
-								return (
-									<Task
-										key={task.id}
-										id={task.id}
-										taskText={task.label}
-										done={task.done}
-										deleteTask={deleteTask}
-										addTaskDone={addTaskDone}
-										notDoneYet={notDoneYet}
-									/>
-								);
-							})}
+							.filter(task => task.done === false).length ===
+						0 ? (
+							<p className="col-12 mt-3 text-secondary">
+								No tasks, add a task
+							</p>
+						) : (
+							list
+								.filter(task => task.done === false)
+								.map(task => {
+									return (
+										<Task
+											key={task.id}
+											id={task.id}
+											taskText={task.label}
+											done={task.done}
+											deleteTask={deleteTask}
+											addTaskDone={addTaskDone}
+											notDoneYet={notDoneYet}
+										/>
+									);
+								})
+						)}
 
 						<div className="d-flex justify-content-start">
 							<div className="taskNum">
-								{
-									list.filter(task => task.done === false)
-										.length
-								}{" "}
-								tasks left
+								{list.filter(task => task.done === false)
+									.length > 0
+									? `${
+											list.filter(
+												task => task.done === false
+											).length
+									  } tasks left`
+									: ""}
 							</div>
 						</div>
 					</div>
 
 					<div className="d-flex flex-column col-5 ml-1">
-						<h4 className="col-12 taskTitle">Done tasks</h4>
+						<h4 className="col-12 taskTitle">Done Tasks</h4>
 						{list
 							//Tareas hechas
 							.filter(task => task.done === true).length === 0 ? (
