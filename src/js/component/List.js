@@ -104,6 +104,29 @@ export function List() {
 		}
 	}
 
+	async function notDoneYet(taskId) {
+		let newList = list.map(task => {
+			if (task.id === taskId) {
+				task.done = false;
+			}
+
+			return task;
+		});
+
+		const requestOptions = {
+			method: "PUT",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(newList)
+		};
+
+		try {
+			await fetch(url, requestOptions);
+			await getList();
+		} catch (error) {
+			console.error(error);
+		}
+	}
+
 	return (
 		<div className="container text-center mt-5 mb-5 pt-3 pb-5 d-flex justify-content-center rounded myListContainer">
 			<div className="p-0 m-0 myContainer">
@@ -127,6 +150,7 @@ export function List() {
 					<div className="d-flex flex-column col-6">
 						<h4 className="col-12 taskTitle">Tasks to do</h4>
 						{list
+							//Tareas pendientes
 							.filter(task => task.done === false)
 							.map(task => {
 								return (
@@ -137,6 +161,7 @@ export function List() {
 										done={task.done}
 										deleteTask={deleteTask}
 										addTaskDone={addTaskDone}
+										notDoneYet={notDoneYet}
 									/>
 								);
 							})}
@@ -155,6 +180,7 @@ export function List() {
 					<div className="d-flex flex-column col-6">
 						<h4 className="col-12 taskTitle">Done tasks</h4>
 						{list
+							//Tareas hechas
 							.filter(task => task.done === true)
 							.map(task => {
 								return (
@@ -165,6 +191,7 @@ export function List() {
 										done={task.done}
 										deleteTask={deleteTask}
 										addTaskDone={addTaskDone}
+										notDoneYet={notDoneYet}
 									/>
 								);
 							})}
