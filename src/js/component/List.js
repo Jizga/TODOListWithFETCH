@@ -87,8 +87,21 @@ export function List() {
 		}
 	}
 
-	function deleteTask(idTask) {
-		console.log("función de borrar tarea seleccionada");
+	async function deleteTask(idTask) {
+		let newList = list.filter(task => task.id !== idTask);
+
+		const requestOptions = {
+			method: "PUT",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(newList)
+		};
+
+		try {
+			await fetch(url, requestOptions);
+			await getList();
+		} catch (error) {
+			console.error(error);
+		}
 	}
 
 	return (
