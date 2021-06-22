@@ -147,7 +147,7 @@ export function List() {
 				</div>
 
 				<div className="row d-flex justify-content-center align-items-start">
-					<div className="d-flex flex-column col-6">
+					<div className="d-flex flex-column col-5 mr-1">
 						<h4 className="col-12 taskTitle">Tasks to do</h4>
 						{list
 							//Tareas pendientes
@@ -177,29 +177,42 @@ export function List() {
 						</div>
 					</div>
 
-					<div className="d-flex flex-column col-6">
+					<div className="d-flex flex-column col-5 ml-1">
 						<h4 className="col-12 taskTitle">Done tasks</h4>
 						{list
 							//Tareas hechas
-							.filter(task => task.done === true)
-							.map(task => {
-								return (
-									<Task
-										key={task.id}
-										id={task.id}
-										taskText={task.label}
-										done={task.done}
-										deleteTask={deleteTask}
-										addTaskDone={addTaskDone}
-										notDoneYet={notDoneYet}
-									/>
-								);
-							})}
+							.filter(task => task.done === true).length === 0 ? (
+							<p className="col-12 mt-3 text-secondary">
+								You did not do any of your tasks
+							</p>
+						) : (
+							list
+								.filter(task => task.done === true)
+								.map(task => {
+									return (
+										<Task
+											key={task.id}
+											id={task.id}
+											taskText={task.label}
+											done={task.done}
+											deleteTask={deleteTask}
+											addTaskDone={addTaskDone}
+											notDoneYet={notDoneYet}
+										/>
+									);
+								})
+						)}
 
 						<div className="d-flex justify-content-start">
 							<div className="taskNum">
-								{list.filter(task => task.done === true).length}{" "}
-								tasks done
+								{list.filter(task => task.done === true)
+									.length > 0
+									? `${
+											list.filter(
+												task => task.done === true
+											).length
+									  } tasks done`
+									: ""}
 							</div>
 						</div>
 					</div>
