@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Task } from "./Task";
 
 export function List() {
-	//Variables relacionadas con el fetch
 	const url = "https://assets.breatheco.de/apis/fake/todos/user/jizga";
 
 	const [inputTask, setInputTask] = useState("");
@@ -13,14 +12,15 @@ export function List() {
 		getList();
 	}, []);
 
-	const getList = () => {
-		fetch(url, {
+	async function getList() {
+		await fetch(url, {
 			method: "GET",
 			headers: {
 				"Content-Type": "application/json"
 			}
 		})
 			.then(response => response.json())
+
 			.then(data => {
 				if (data) {
 					data.map(task =>
@@ -29,66 +29,64 @@ export function List() {
 							: addTaskToDoneList(task)
 					);
 				} else {
-					console.error("Error in data");
+					console.log("Error in data");
 				}
 			})
 			.catch(error => console.error("Error:", error));
-	};
+	}
 
-	const getInputValue = e => {
+	function getInputValue(e) {
 		setInputTask(e.target.value);
-	};
+	}
 
-	const addTaskToList = newTask => {
+	//***** FUNCIÓN PARA HACER BIEN LAS ACTUALIZACIONES DE LA LISTA DE PENDIENTES */
+	function addTaskToList(newTask) {
 		// Parece ser que asi es como se añaden cosas en React cuando quieres meterle algo a un array
 		// prevList es lo que hay antes de meter la Task
 		// Los set del useState parece ser que no son inmediatos, simplemente lo pone en cola y ya lo hara cuando
 		// él quiera, por eso antes solo metía el último
 		setList(prevList => [...prevList, newTask]);
-	};
+	}
 
-	const addTaskToDoneList = newDoneTask => {
+	//***** FUNCIÓN PARA HACER BIEN LAS ACTUALIZACIONES DE LA LISTA DE COMPLETADOS*/
+	function addTaskToDoneList(newDoneTask) {
 		setListDone(prevDoneList => [...prevDoneList, newDoneTask]);
-	};
+	}
 
-	const addTask = newTask => {
-		fetch(url, {
+	async function addTask(newTask) {
+		// "newList" -->>>> undefined ?¿?¿?¿?
+
+		let newList = addTaskToList({
+			id: Date.now(),
+			label: newTask,
+			done: false
+		});
+
+		console.log("newList antes del fetch : ", newList);
+
+		await fetch(url, {
 			method: "PUT",
-			body: JSON.stringify(list),
+			body: JSON.stringify(newList),
 			headers: {
 				"Content-Type": "application/json"
 			}
 		})
 			.then(response => response.json())
-			.then(data => {
-				if (data) {
-					if (inputTask.trim() !== "") {
-						setList([
-							...list,
-							{
-								id: Date.now(),
-								label: newTask,
-								done: false
-							}
-						]);
-					}
-				} else {
-					console.error("Error in data");
-				}
-			})
-			.catch(error => console.error("Error:", error));
-	};
+			.catch(error => console.error("Error:", error))
+			.then(data => console.log("Success:", data));
+		console.log("newList en el fetch : ", newList);
+	}
 
-	const pressEnter = e => {
+	function pressEnter(e) {
 		if (inputTask.trim() !== "") {
 			if (e.key === "Enter") {
 				addTask(inputTask);
 				setInputTask("");
 			}
 		}
-	};
+	}
 
-	const deleteTask = idTask => {
+	function deleteTask(idTask) {
 		//La actualización de la lista debe de ser antes del fetch
 		setList(list.filter(task => task.id !== idTask));
 
@@ -104,12 +102,14 @@ export function List() {
 			.then(data =>
 				data
 					? console.log("Data is ok: ", data)
-					: console.error("Error in data")
+					: console.error(
+							`The error in data was a ${Response.status}`
+					  )
 			)
 			.catch(error => console.error("Error:", error));
-	};
+	}
 
-	const addTaskDone = idDone => {
+	function addTaskDone(idDone) {
 		fetch(url, {
 			method: "PUT",
 			body: JSON.stringify(listDone),
@@ -142,11 +142,11 @@ export function List() {
 						});
 					}
 				} else {
-					console.error("Error in data");
+					console.log("Error in data");
 				}
 			})
 			.catch(error => console.error("Error:", error));
-	};
+	}
 
 	return (
 		<div className="container text-center mt-5 mb-5 pt-3 pb-5 d-flex justify-content-center rounded myListContainer">
