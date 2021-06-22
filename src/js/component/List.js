@@ -12,33 +12,6 @@ export function List() {
 		getList();
 	}, []);
 
-	async function getList() {
-		await fetch(url, {
-			method: "GET",
-			headers: {
-				"Content-Type": "application/json"
-			}
-		})
-			.then(response => response.json())
-
-			.then(data => {
-				if (data) {
-					data.map(task =>
-						task.done === false
-							? addTaskToList(task)
-							: addTaskToDoneList(task)
-					);
-				} else {
-					console.log("Error in data");
-				}
-			})
-			.catch(error => console.error("Error:", error));
-	}
-
-	function getInputValue(e) {
-		setInputTask(e.target.value);
-	}
-
 	//***** FUNCIÓN PARA HACER BIEN LAS ACTUALIZACIONES DE LA LISTA DE PENDIENTES */
 	function addTaskToList(newTask) {
 		// Parece ser que asi es como se añaden cosas en React cuando quieres meterle algo a un array
@@ -53,28 +26,34 @@ export function List() {
 		setListDone(prevDoneList => [...prevDoneList, newDoneTask]);
 	}
 
-	async function addTask(newTask) {
-		// "newList" -->>>> undefined ?¿?¿?¿?
+	function getInputValue(e) {
+		setInputTask(e.target.value);
+	}
 
-		let newList = addTaskToList({
-			id: Date.now(),
-			label: newTask,
-			done: false
-		});
+	async function getList() {
+		try {
+			let response = await fetch(url);
 
-		console.log("newList antes del fetch : ", newList);
+			if (!response.ok) {
+				throw new Error(`HTTP error! status: ${response.status}`);
+			} else {
+				const fetchList = await response.json();
 
-		await fetch(url, {
-			method: "PUT",
-			body: JSON.stringify(newList),
-			headers: {
-				"Content-Type": "application/json"
+				fetchList.map(task =>
+					task.done === false
+						? addTaskToList(task)
+						: addTaskToDoneList(task)
+				);
+
+				return fetchList;
 			}
-		})
-			.then(response => response.json())
-			.catch(error => console.error("Error:", error))
-			.then(data => console.log("Success:", data));
-		console.log("newList en el fetch : ", newList);
+		} catch (e) {
+			console.error(`error from database -- ${e}`);
+		}
+	}
+
+	async function addTask(newTask) {
+		console.log("función de añadir una nueva tarea");
 	}
 
 	function pressEnter(e) {
@@ -86,66 +65,12 @@ export function List() {
 		}
 	}
 
-	function deleteTask(idTask) {
-		//La actualización de la lista debe de ser antes del fetch
-		setList(list.filter(task => task.id !== idTask));
-
-		fetch(url, {
-			method: "PUT", //El método DELETE de esta api lo borra todo, usuario incluido
-			//El PUT está funcionando regular, actualiza la lista en la BD cuando se ha borrado o añadido dos tareas, borrando o añadiendo la primera de ellas
-			body: JSON.stringify(list),
-			headers: {
-				"Content-Type": "application/json"
-			}
-		})
-			.then(response => response.json())
-			.then(data =>
-				data
-					? console.log("Data is ok: ", data)
-					: console.error(
-							`The error in data was a ${Response.status}`
-					  )
-			)
-			.catch(error => console.error("Error:", error));
+	function addTaskDone(idDone) {
+		console.log("función de añadir tareas hechas");
 	}
 
-	function addTaskDone(idDone) {
-		fetch(url, {
-			method: "PUT",
-			body: JSON.stringify(listDone),
-			headers: {
-				"Content-Type": "application/json"
-			}
-		})
-			.then(response => response.json())
-			.then(data => {
-				if (data) {
-					if (listDone !== []) {
-						//lista de tareas hechas actualizada con la tarea hecha
-						let taskDone = list.filter(task => {
-							if (task.id === idDone) {
-								task.done = true;
-
-								setListDone([...listDone, taskDone]);
-
-								let listWithoutTaskDone = list.filter(
-									task => task.id !== idDone
-								);
-
-								console.log("taskDone : ", taskDone);
-
-								//Lista de tareas pendientes actualizada
-								setList(listWithoutTaskDone);
-
-								console.log("lista pendientes : ", list);
-							}
-						});
-					}
-				} else {
-					console.log("Error in data");
-				}
-			})
-			.catch(error => console.error("Error:", error));
+	function deleteTask(idTask) {
+		console.log("función de borrar tarea seleccionada");
 	}
 
 	return (
