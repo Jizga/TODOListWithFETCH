@@ -6,25 +6,10 @@ export function List() {
 
 	const [inputTask, setInputTask] = useState("");
 	const [list, setList] = useState([]);
-	const [listDone, setListDone] = useState([]);
 
 	useEffect(() => {
 		getList();
 	}, []);
-
-	//***** FUNCIÓN PARA HACER BIEN LAS ACTUALIZACIONES DE LA LISTA DE PENDIENTES */
-	function addTaskToList(newTask) {
-		// Parece ser que asi es como se añaden cosas en React cuando quieres meterle algo a un array
-		// prevList es lo que hay antes de meter la Task
-		// Los set del useState parece ser que no son inmediatos, simplemente lo pone en cola y ya lo hara cuando
-		// él quiera, por eso antes solo metía el último
-		setList(prevList => [...prevList, newTask]);
-	}
-
-	//***** FUNCIÓN PARA HACER BIEN LAS ACTUALIZACIONES DE LA LISTA DE COMPLETADOS*/
-	function addTaskToDoneList(newDoneTask) {
-		setListDone(prevDoneList => [...prevDoneList, newDoneTask]);
-	}
 
 	function getInputValue(e) {
 		setInputTask(e.target.value);
@@ -39,13 +24,7 @@ export function List() {
 			} else {
 				const fetchList = await response.json();
 
-				fetchList.map(task =>
-					task.done === false
-						? addTaskToList(task)
-						: addTaskToDoneList(task)
-				);
-
-				return fetchList;
+				setList(fetchList);
 			}
 		} catch (e) {
 			console.error(`error from database -- ${e}`);
@@ -53,7 +32,27 @@ export function List() {
 	}
 
 	async function addTask(newTask) {
-		console.log("función de añadir una nueva tarea");
+		const newList = [
+			...list,
+			{
+				id: Date.now(),
+				label: newTask,
+				done: false
+			}
+		];
+
+		const requestOptions = {
+			method: "PUT",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(newList)
+		};
+
+		try {
+			await fetch(url, requestOptions);
+			await getList();
+		} catch (error) {
+			console.error(error);
+		}
 	}
 
 	function pressEnter(e) {
@@ -65,8 +64,27 @@ export function List() {
 		}
 	}
 
-	function addTaskDone(idDone) {
-		console.log("función de añadir tareas hechas");
+	async function addTaskDone(idDone) {
+		let newList = list.map(task => {
+			if (task.id === idDone) {
+				task.done = true;
+			}
+
+			return task;
+		});
+
+		const requestOptions = {
+			method: "PUT",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(newList)
+		};
+
+		try {
+			await fetch(url, requestOptions);
+			await getList();
+		} catch (error) {
+			console.error(error);
+		}
 	}
 
 	function deleteTask(idTask) {
@@ -95,44 +113,53 @@ export function List() {
 				<div className="row d-flex justify-content-center align-items-start">
 					<div className="d-flex flex-column col-6">
 						<h4 className="col-12 taskTitle">Tasks to do</h4>
-						{list.map(task => {
-							return (
-								<Task
-									key={task.id}
-									id={task.id}
-									taskText={task.label}
-									done={task.done}
-									deleteTask={deleteTask}
-									addTaskDone={addTaskDone}
-								/>
-							);
-						})}
+						{list
+							.filter(task => task.done === false)
+							.map(task => {
+								return (
+									<Task
+										key={task.id}
+										id={task.id}
+										taskText={task.label}
+										done={task.done}
+										deleteTask={deleteTask}
+										addTaskDone={addTaskDone}
+									/>
+								);
+							})}
 
 						<div className="d-flex justify-content-start">
 							<div className="taskNum">
-								{list.length} tasks left
+								{
+									list.filter(task => task.done === false)
+										.length
+								}{" "}
+								tasks left
 							</div>
 						</div>
 					</div>
 
 					<div className="d-flex flex-column col-6">
 						<h4 className="col-12 taskTitle">Done tasks</h4>
-						{listDone.map(task => {
-							return (
-								<Task
-									key={task.id}
-									id={task.id}
-									taskText={task.label}
-									done={task.done}
-									deleteTask={deleteTask}
-									addTaskDone={addTaskDone}
-								/>
-							);
-						})}
+						{list
+							.filter(task => task.done === true)
+							.map(task => {
+								return (
+									<Task
+										key={task.id}
+										id={task.id}
+										taskText={task.label}
+										done={task.done}
+										deleteTask={deleteTask}
+										addTaskDone={addTaskDone}
+									/>
+								);
+							})}
 
 						<div className="d-flex justify-content-start">
 							<div className="taskNum">
-								{listDone.length} tasks done
+								{list.filter(task => task.done === true).length}{" "}
+								tasks done
 							</div>
 						</div>
 					</div>
